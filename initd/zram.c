@@ -116,10 +116,12 @@ mount_zram_on_tmp(void)
 		waitpid(pid, NULL, 0);
 	}
 
-	ret = mount("/dev/zram0", "/tmp", "ext4", MS_NOSUID | MS_NODEV | MS_NOATIME, "errors=continue,noquota");
-	if (ret < 0) {
-		ERROR("Can't mount /dev/zram0 on /tmp: %m\n");
-		return errno;
+	if (priviledged) {
+		ret = mount("/dev/zram0", "/tmp", "ext4", MS_NOSUID | MS_NODEV | MS_NOATIME, "errors=continue,noquota");
+		if (ret < 0) {
+			ERROR("Can't mount /dev/zram0 on /tmp: %m\n");
+			return errno;
+		}
 	}
 
 	LOG("Using up to %ld kB of RAM as ZRAM storage on /mnt\n", zramsize);

@@ -26,6 +26,7 @@
 #include "plug/hotplug.h"
 
 unsigned int debug;
+unsigned int priviledged = 1;
 
 static int usage(const char *prog)
 {
@@ -43,12 +44,19 @@ int main(int argc, char **argv)
 {
 	int ch;
 	char *dbglvl = getenv("DBGLVL");
+	char *container = getenv("container");
 	int ulog_channels = ULOG_KMSG;
 
 	if (dbglvl) {
 		debug = atoi(dbglvl);
 		unsetenv("DBGLVL");
 	}
+
+    if (container) {
+        if (strcmp("lxc",container) != 0) {
+            priviledged = 0;
+        }
+    }
 
 	while ((ch = getopt(argc, argv, "d:s:h:S")) != -1) {
 		switch (ch) {
