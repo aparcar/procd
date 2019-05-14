@@ -14,8 +14,6 @@
 #ifndef __PROCD_SYSUPGRADE_H
 #define __PROCD_SYSUPGRADE_H
 
-
 void sysupgrade_exec_upgraded(const char *prefix, char *path, char *command);
-
 
 #endif
