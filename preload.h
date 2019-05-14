@@ -18,39 +18,24 @@
 #endif
 
 #ifndef attribute_unused
-#define attribute_unused __attribute__ ((unused))
+#define attribute_unused __attribute__((unused))
 #endif
 typedef int (*main_t)(int, char **, char **);
 
 typedef int (*start_main_t)(main_t main, int, char *__unbounded *__unbounded,
-			ElfW(auxv_t) *,
-			__typeof (main),
-			void (*fini) (void),
-			void (*rtld_fini) (void),
-			void *__unbounded stack_end);
+                            ElfW(auxv_t) *, __typeof(main), void (*fini)(void),
+                            void (*rtld_fini)(void),
+                            void *__unbounded stack_end);
 
-int __libc_start_main(main_t main,
-			int argc,
-			char **argv,
-			ElfW(auxv_t) *auxvec,
-			__typeof (main) init,
-			void (*fini) (void),
-			void (*rtld_fini) (void),
-			void *stack_end);
+int __libc_start_main(main_t main, int argc, char **argv, ElfW(auxv_t) * auxvec,
+                      __typeof(main) init, void (*fini)(void),
+                      void (*rtld_fini)(void), void *stack_end);
 
+typedef void (*uClibc_main)(main_t main, int argc, char **argv,
+                            void (*app_init)(void), void (*app_fini)(void),
+                            void (*rtld_fini)(void),
+                            void *stack_end attribute_unused);
 
-typedef void (*uClibc_main)(main_t main,
-			int argc,
-			char **argv,
-			void (*app_init)(void),
-			void (*app_fini)(void),
-			void (*rtld_fini)(void),
-			void *stack_end attribute_unused);
-
-void __uClibc_main(main_t main,
-			int argc,
-			char **argv,
-			void (*app_init)(void),
-			void (*app_fini)(void),
-			void (*rtld_fini)(void),
-			void *stack_end attribute_unused);
+void __uClibc_main(main_t main, int argc, char **argv, void (*app_init)(void),
+                   void (*app_fini)(void), void (*rtld_fini)(void),
+                   void *stack_end attribute_unused);
