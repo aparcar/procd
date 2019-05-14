@@ -13,43 +13,40 @@
  * GNU General Public License for more details.
  */
 
-
-#include "watchdog.h"
 #include "sysupgrade.h"
+#include "watchdog.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
+void sysupgrade_exec_upgraded(const char *prefix, char *path, char *command) {
+  char *wdt_fd = watchdog_fd();
+  char *argv[] = {"/sbin/upgraded", NULL, NULL, NULL};
+  int ret;
 
-void sysupgrade_exec_upgraded(const char *prefix, char *path, char *command)
-{
-	char *wdt_fd = watchdog_fd();
-	char *argv[] = { "/sbin/upgraded", NULL, NULL, NULL};
-	int ret;
+  ret = chroot(prefix);
+  if (ret < 0) {
+    fprintf(stderr, "Failed to chroot for upgraded exec.\n");
+    return;
+  }
 
-	ret = chroot(prefix);
-	if (ret < 0) {
-		fprintf(stderr, "Failed to chroot for upgraded exec.\n");
-		return;
-	}
+  argv[1] = path;
+  argv[2] = command;
 
-	argv[1] = path;
-	argv[2] = command;
+  if (wdt_fd) {
+    watchdog_set_cloexec(false);
+    setenv("WDTFD", wdt_fd, 1);
+  }
+  execvp(argv[0], argv);
 
-	if (wdt_fd) {
-		watchdog_set_cloexec(false);
-		setenv("WDTFD", wdt_fd, 1);
-	}
-	execvp(argv[0], argv);
-
-	/* Cleanup on failure */
-	fprintf(stderr, "Failed to exec upgraded.\n");
-	unsetenv("WDTFD");
-	watchdog_set_cloexec(true);
-	ret = chroot(".");
-	if (ret < 0) {
-		fprintf(stderr, "Failed to reset chroot, exiting.\n");
-		exit(EXIT_FAILURE);
-	}
+  /* Cleanup on failure */
+  fprintf(stderr, "Failed to exec upgraded.\n");
+  unsetenv("WDTFD");
+  watchdog_set_cloexec(true);
+  ret = chroot(".");
+  if (ret < 0) {
+    fprintf(stderr, "Failed to reset chroot, exiting.\n");
+    exit(EXIT_FAILURE);
+  }
 }

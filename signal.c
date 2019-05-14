@@ -19,85 +19,74 @@
 
 #include "procd.h"
 
-static void do_reboot(void)
-{
-	LOG("reboot\n");
-	fflush(stderr);
-	sync();
-	sleep(2);
-	reboot(RB_AUTOBOOT);
-	while (1)
-	;
+static void do_reboot(void) {
+  LOG("reboot\n");
+  fflush(stderr);
+  sync();
+  sleep(2);
+  reboot(RB_AUTOBOOT);
+  while (1)
+    ;
 }
 
-static void signal_shutdown(int signal, siginfo_t *siginfo, void *data)
-{
-	int event = 0;
-	char *msg = NULL;
+static void signal_shutdown(int signal, siginfo_t *siginfo, void *data) {
+  int event = 0;
+  char *msg = NULL;
 
 #ifndef DISABLE_INIT
-	switch(signal) {
-	case SIGINT:
-	case SIGTERM:
-		event = RB_AUTOBOOT;
-		msg = "reboot";
-		break;
-	case SIGUSR1:
-	case SIGUSR2:
-	case SIGPWR:
-		event = RB_POWER_OFF;
-		msg = "poweroff";
-		break;
-	}
+  switch (signal) {
+  case SIGINT:
+  case SIGTERM:
+    event = RB_AUTOBOOT;
+    msg = "reboot";
+    break;
+  case SIGUSR1:
+  case SIGUSR2:
+  case SIGPWR:
+    event = RB_POWER_OFF;
+    msg = "poweroff";
+    break;
+  }
 #endif
 
-	DEBUG(1, "Triggering %s\n", msg);
-	if (event)
-		procd_shutdown(event);
+  DEBUG(1, "Triggering %s\n", msg);
+  if (event)
+    procd_shutdown(event);
 }
 
-struct sigaction sa_shutdown = {
-	.sa_sigaction = signal_shutdown,
-	.sa_flags = SA_SIGINFO
-};
+struct sigaction sa_shutdown = {.sa_sigaction = signal_shutdown,
+                                .sa_flags = SA_SIGINFO};
 
-static void signal_crash(int signal, siginfo_t *siginfo, void *data)
-{
-	ERROR("Rebooting as procd has crashed\n");
-	do_reboot();
+static void signal_crash(int signal, siginfo_t *siginfo, void *data) {
+  ERROR("Rebooting as procd has crashed\n");
+  do_reboot();
 }
 
-struct sigaction sa_crash = {
-	.sa_sigaction = signal_crash,
-	.sa_flags = SA_SIGINFO
-};
+struct sigaction sa_crash = {.sa_sigaction = signal_crash,
+                             .sa_flags = SA_SIGINFO};
 
-static void signal_dummy(int signal, siginfo_t *siginfo, void *data)
-{
-	ERROR("Got unexpected signal %d\n", signal);
+static void signal_dummy(int signal, siginfo_t *siginfo, void *data) {
+  ERROR("Got unexpected signal %d\n", signal);
 }
 
-struct sigaction sa_dummy = {
-	.sa_sigaction = signal_dummy,
-	.sa_flags = SA_SIGINFO
-};
+struct sigaction sa_dummy = {.sa_sigaction = signal_dummy,
+                             .sa_flags = SA_SIGINFO};
 
-void procd_signal(void)
-{
-	signal(SIGPIPE, SIG_IGN);
-	if (getpid() != 1)
-		return;
-	sigaction(SIGTERM, &sa_shutdown, NULL);
-	sigaction(SIGINT, &sa_shutdown, NULL);
-	sigaction(SIGUSR1, &sa_shutdown, NULL);
-	sigaction(SIGUSR2, &sa_shutdown, NULL);
-	sigaction(SIGPWR, &sa_shutdown, NULL);
-	sigaction(SIGSEGV, &sa_crash, NULL);
-	sigaction(SIGBUS, &sa_crash, NULL);
-	sigaction(SIGHUP, &sa_dummy, NULL);
-	sigaction(SIGKILL, &sa_dummy, NULL);
-	sigaction(SIGSTOP, &sa_dummy, NULL);
+void procd_signal(void) {
+  signal(SIGPIPE, SIG_IGN);
+  if (getpid() != 1)
+    return;
+  sigaction(SIGTERM, &sa_shutdown, NULL);
+  sigaction(SIGINT, &sa_shutdown, NULL);
+  sigaction(SIGUSR1, &sa_shutdown, NULL);
+  sigaction(SIGUSR2, &sa_shutdown, NULL);
+  sigaction(SIGPWR, &sa_shutdown, NULL);
+  sigaction(SIGSEGV, &sa_crash, NULL);
+  sigaction(SIGBUS, &sa_crash, NULL);
+  sigaction(SIGHUP, &sa_dummy, NULL);
+  sigaction(SIGKILL, &sa_dummy, NULL);
+  sigaction(SIGSTOP, &sa_dummy, NULL);
 #ifndef DISABLE_INIT
-	reboot(RB_DISABLE_CAD);
+  reboot(RB_DISABLE_CAD);
 #endif
 }

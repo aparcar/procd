@@ -17,12 +17,14 @@
 
 #include <libubox/ulog.h>
 
-#define DEBUG(level, fmt, ...) do { \
-	if (debug >= level) { \
-		ulog(LOG_NOTICE, fmt, ## __VA_ARGS__); \
-	} } while (0)
+#define DEBUG(level, fmt, ...)                                                 \
+  do {                                                                         \
+    if (debug >= level) {                                                      \
+      ulog(LOG_NOTICE, fmt, ##__VA_ARGS__);                                    \
+    }                                                                          \
+  } while (0)
 
-#define LOG   ULOG_INFO
+#define LOG ULOG_INFO
 #define ERROR ULOG_ERR
 
 extern unsigned int debug;
