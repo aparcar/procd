@@ -21,6 +21,7 @@
 #include <signal.h>
 
 #include "procd.h"
+#include "container.h"
 #include "syslog.h"
 #include "plug/hotplug.h"
 #include "watchdog.h"
@@ -156,6 +157,9 @@ static void state_enter(void)
 			LOG("- power down -\n");
 		else
 			LOG("- reboot -\n");
+
+		if (is_container())
+			exit(0);
 
 		/* Allow time for last message to reach serial console, etc */
 		sleep(1);
