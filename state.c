@@ -101,6 +101,9 @@ static void state_enter(void)
 	switch (state) {
 	case STATE_EARLY:
 		LOG("- early -\n");
+		if (is_container())
+			LOG("This isn't real life");
+
 		watchdog_init(0);
 		hotplug("/etc/hotplug.json");
 		procd_coldplug();
